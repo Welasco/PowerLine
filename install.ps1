@@ -1,5 +1,7 @@
 # Download Windows CacadiaCode Font
-$font_url = "https://github.com/microsoft/cascadia-code/releases/download/v2102.25/CascadiaCode-2102.25.zip"
+$releases = Invoke-RestMethod -Uri https://api.github.com/repos/microsoft/cascadia-code/releases
+#$font_url = "https://github.com/microsoft/cascadia-code/releases/download/v2102.25/CascadiaCode-2102.25.zip"
+$font_url = $releases[0].assets[0].browser_download_url
 $fontfilzip = $font_url.Split("/")[$font_url.Split("/").count-1]
 Invoke-WebRequest -Uri $font_url -OutFile $fontfilzip
 $RunPath = (Get-Location).path
