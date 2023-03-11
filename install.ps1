@@ -109,3 +109,5 @@ $jsonWTfile.profiles.list
 # }
 $jsonWTfile.profiles.defaults.font | Add-Member -Name "face" -MemberType NoteProperty -Value $fontName -Force
 $jsonWTfile | ConvertTo-Json -Depth 100 | Out-File $wtSettingsFile
+
+Read-Host "Press Enter to close this window"
