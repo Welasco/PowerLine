@@ -71,7 +71,22 @@ if (!(Test-Path $PROFILE)) {
 $ProfilePoshGit | Out-File $PROFILE -Append
 
 # Create Profile PowerShell 5
-Start-Process powershell.exe "-ExecutionPolicy Unrestricted -c `"Set-ExecutionPolicy -ExecutionPolicy Unrestricted; Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck; if(!(Test-Path `$PROFILE)){New-Item `$PROFILE -Force}; $ProfilePoshGit | Out-File `$PROFILE -Append`;Read-Host `"Press Enter to close this window`"" "
+#Start-Process powershell.exe "-ExecutionPolicy Unrestricted -c `"Set-ExecutionPolicy -ExecutionPolicy Unrestricted; Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck; if(!(Test-Path `$PROFILE)){New-Item `$PROFILE -Force}; $ProfilePoshGit | Out-File `$PROFILE -Append`;Read-Host `"Press Enter to close this window`"" "
+$scriptblock = {
+    Set-ExecutionPolicy -ExecutionPolicy Unrestricted;
+    Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck;
+    if(!(Test-Path $PROFILE)){New-Item $PROFILE -Force};
+$ProfilePoshGit = @"
+Function Load-PowerLine{
+    oh-my-posh init pwsh --config ~/.custom.omp.json | Invoke-Expression
+    Import-Module -Name Terminal-Icons
+}
+Load-PowerLine
+"@
+    Write-Output "PowerShell 5 Profile: $PROFILE"
+    $ProfilePoshGit | Out-File $PROFILE -Append;
+}
+powershell -ExecutionPolicy Unrestricted $scriptblock
 
 # $addmember =@"
 # {
