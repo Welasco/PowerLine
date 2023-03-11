@@ -1,6 +1,6 @@
 # Re-Execute the script in admin mode in case it's not already
 # Required to install windows fonts
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) { Start-Process pwsh.exe "-ExecutionPolicy Unrestricted -c `"iex (iwr https://raw.githubusercontent.com/Welasco/PowerLine/master/install.ps1)`" " -Verb RunAs;}
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) { Start-Process pwsh.exe "-ExecutionPolicy Unrestricted -c `"iex (iwr https://raw.githubusercontent.com/Welasco/PowerLine/master/install.ps1)`" " -Verb RunAs; exit}
 # Download Windows CacadiaCode Font
 $releases = Invoke-RestMethod -Uri https://api.github.com/repos/ryanoasis/nerd-fonts/releases
 $cascadia_release = ($releases[0].assets | Where{$_.Name -eq "CascadiaCode.zip"}).browser_download_url
@@ -45,7 +45,7 @@ foreach ($f in $(Get-ChildItem "$RunPath\fonts" -Filter *.otf -File)) {
 }
 
 # Installing oh-my-posh from MS Store
-winget install XP8K0HKJFRXGCK --accept-package-agreements
+winget install XP8K0HKJFRXGCK --accept-package-agreements --accept-source-agreements
 
 # Install Terminal-Icons
 Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck
