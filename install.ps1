@@ -49,7 +49,6 @@ winget install XP8K0HKJFRXGCK --accept-package-agreements --accept-source-agreem
 
 # Install Terminal-Icons
 Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck
-Start-Process powershell.exe "-ExecutionPolicy Unrestricted -c `"Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck`" "
 
 # PowerShell Core
 # Install-Module -Name PSReadLine -Scope CurrentUser -Force -SkipPublisherCheck
@@ -72,7 +71,7 @@ if (!(Test-Path $PROFILE)) {
 $ProfilePoshGit | Out-File $PROFILE -Append
 
 # Create Profile PowerShell 5
-Start-Process powershell.exe "-ExecutionPolicy Unrestricted -c `"Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck; if(!(Test-Path `$PROFILE)){New-Item `$PROFILE -Force}; $ProfilePoshGit | Out-File `$PROFILE -Append`" "
+Start-Process powershell.exe "-ExecutionPolicy Unrestricted -c `"Set-ExecutionPolicy -ExecutionPolicy Unrestricted; Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck; if(!(Test-Path `$PROFILE)){New-Item `$PROFILE -Force}; $ProfilePoshGit | Out-File `$PROFILE -Append`;Read-Host `"Press Enter to close this window`"" "
 
 # $addmember =@"
 # {
