@@ -1,13 +1,13 @@
 # Download Windows CacadiaCode Font
-$releases = Invoke-RestMethod -Uri https://api.github.com/repos/microsoft/cascadia-code/releases
-#$font_url = "https://github.com/microsoft/cascadia-code/releases/download/v2102.25/CascadiaCode-2102.25.zip"
-$font_url = $releases[0].assets[0].browser_download_url
+$releases = Invoke-RestMethod -Uri https://api.github.com/repos/ryanoasis/nerd-fonts/releases
+$cascadia_release = ($releases[0].assets | Where{$_.Name -eq "CascadiaCode.zip"}).browser_download_url
+$font_url = $cascadia_release
 $fontfilzip = $font_url.Split("/")[$font_url.Split("/").count-1]
 Invoke-WebRequest -Uri $font_url -OutFile $fontfilzip
 $RunPath = (Get-Location).path
-#Expand-Archive "$PSScriptRoot\$fontfilzip" -DestinationPath "$PSScriptRoot\fonts" -Force
 Expand-Archive "$RunPath\$fontfilzip" -DestinationPath "$RunPath\fonts" -Force
 
+# Function to Install Fonts
 function Install-Fonts {
     param (
         [Parameter(Mandatory = $true)]
@@ -35,71 +35,74 @@ function Install-Fonts {
     }
 }
 
-foreach ($f in $(Get-ChildItem "$RunPath\fonts\ttf" -File)) {
+# Install Fonts
+foreach ($f in $(Get-ChildItem "$RunPath\fonts" -Filter *.otf -File)) {
     Install-Fonts -FontFile $f.fullName
     $f.fullname
-}    
+}
 
-Install-Module posh-git -Scope CurrentUser
-Install-Module oh-my-posh -Scope CurrentUser
+# Installing oh-my-posh from MS Store
+winget install XP8K0HKJFRXGCK --accept-package-agreements
+
+# Install Terminal-Icons
+Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck
 
 # PowerShell Core
 # Install-Module -Name PSReadLine -Scope CurrentUser -Force -SkipPublisherCheck
 
+# Download my personal oh-my-posh config
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Welasco/PowerLine/master/.custom.omp.json" -OutFile "$env:USERPROFILE\.custom.omp.json"
+
 $ProfilePoshGit = @"
 Function Load-PowerLine{
-    Import-Module posh-git
-    Import-Module oh-my-posh
-    Set-PoshPrompt -Theme paradox
+    oh-my-posh init pwsh --config ~/.custom.omp.json | Invoke-Expression
+    Import-Module -Name Terminal-Icons
 }
-
 Load-PowerLine
 "@
 
-$ProfilePoshGit | Out-File "$env:USERPROFILE\Documents\WindowsPowerShell\Profile-PoshGit.ps1"
-$ProfilePoshGit | Out-File "$env:USERPROFILE\Documents\PowerShell\Profile-PoshGit.ps1"
+$ProfilePoshGit | Out-File "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
+$ProfilePoshGit | Out-File "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 
-$addmember =@"
-{
-"terminal.integrated.profiles.windows": {
-    "PowerShell PowerLine": {
-      "source": "PowerShell",
-      "args": ["-NoProfile","-noexit","-command","invoke-expression '. ''C:/Users/$env:USERNAME/Documents/WindowsPowerShell/Profile-PoshGit.ps1'''"]
-    }
-  }
-}
-"@
+# $addmember =@"
+# {
+# "terminal.integrated.profiles.windows": {
+#     "PowerShell PowerLine": {
+#       "source": "PowerShell",
+#       "args": ["-NoProfile","-noexit","-command","invoke-expression '. ''C:/Users/$env:USERNAME/Documents/WindowsPowerShell/Profile-PoshGit.ps1'''"]
+#     }
+#   }
+# }
+# "@
+# $memobj = $addmember.ToString() | ConvertFrom-Json
+# $memobj.'terminal.integrated.profiles.windows'.'PowerShell PowerLine'.args[$memobj.'terminal.integrated.profiles.windows'.'PowerShell PowerLine'.args.count-1] = $memobj.'terminal.integrated.profiles.windows'.'PowerShell PowerLine'.args[$memobj.'terminal.integrated.profiles.windows'.'PowerShell PowerLine'.args.count-1].replace('user',$env:USERNAME)
 
-$memobj = $addmember.ToString() | ConvertFrom-Json
-#$memobj.'terminal.integrated.profiles.windows'.'PowerShell PowerLine'.args[$memobj.'terminal.integrated.profiles.windows'.'PowerShell PowerLine'.args.count-1] = $memobj.'terminal.integrated.profiles.windows'.'PowerShell PowerLine'.args[$memobj.'terminal.integrated.profiles.windows'.'PowerShell PowerLine'.args.count-1].replace('user',$env:USERNAME)
-
+$fontName = "CaskaydiaCove Nerd Font"
 
 $vscodeSettingsFile = "$env:USERPROFILE\AppData\Roaming\Code\User\settings.json"
 Copy-Item $vscodeSettingsFile "$vscodeSettingsFile.bkp"
-#Copy-Item "$vscodeSettingsFile.bkp" $vscodeSettingsFile
 $rawfile = Get-Content $vscodeSettingsFile -Raw
 $jsonfile = $rawfile | ConvertFrom-Json
 $jsonfile
 
-$jsonfile | Add-Member -TypeName System.Management.Automation.PSCustomObject -Name "terminal.integrated.profiles.windows" -MemberType NoteProperty -Value $memobj.'terminal.integrated.profiles.windows' -Force
-$jsonfile | Add-Member -Name "terminal.integrated.fontFamily" -MemberType NoteProperty -Value "Cascadia Code PL"
+#$jsonfile | Add-Member -TypeName System.Management.Automation.PSCustomObject -Name "terminal.integrated.profiles.windows" -MemberType NoteProperty -Value $memobj.'terminal.integrated.profiles.windows' -Force
+$jsonfile | Add-Member -Name "terminal.integrated.fontFamily" -MemberType NoteProperty -Value $fontName -Force
 $jsonfile | ConvertTo-Json -Depth 100 | Out-File $vscodeSettingsFile
 
 
 $wtSettingsFile = "$env:USERPROFILE\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
 Copy-Item $wtSettingsFile "$wtSettingsFile.bkp"
-#Copy-Item "$wtSettingsFile.bkp" $wtSettingsFile 
 $rawWTfile = Get-Content $wtSettingsFile -Raw
 $jsonWTfile = $rawWTfile | ConvertFrom-Json
 $jsonWTfile.profiles.list
 
-foreach ($item in $jsonWTfile.profiles.list) {
-    if ($item.name -eq "Windows PowerShell") {
-        $item | Add-Member -Name "commandline" -MemberType NoteProperty -Value "powershell.exe -noprofile -noexit -command `"invoke-expression '. ''C:/Users/$env:USERNAME/Documents/WindowsPowerShell/Profile-PoshGit.ps1''' `"" -Force
-    }
-    if ($item.name -eq "PowerShell") {
-        $item | Add-Member -Name "commandline" -MemberType NoteProperty -Value "pwsh.exe -noprofile -noexit -command `"invoke-expression '. ''C:/Users/$env:USERNAME/Documents/PowerShell/Profile-PoshGit.ps1''' `"" -Force
-    }    
-}
-$jsonWTfile.profiles.defaults | Add-Member -Name "fontFace" -MemberType NoteProperty -Value "Cascadia Code PL" -Force
+# foreach ($item in $jsonWTfile.profiles.list) {
+#     if ($item.name -eq "Windows PowerShell") {
+#         $item | Add-Member -Name "commandline" -MemberType NoteProperty -Value "powershell.exe -noprofile -noexit -command `"invoke-expression '. ''C:/Users/$env:USERNAME/Documents/WindowsPowerShell/Profile-PoshGit.ps1''' `"" -Force
+#     }
+#     if ($item.name -eq "PowerShell") {
+#         $item | Add-Member -Name "commandline" -MemberType NoteProperty -Value "pwsh.exe -noprofile -noexit -command `"invoke-expression '. ''C:/Users/$env:USERNAME/Documents/PowerShell/Profile-PoshGit.ps1''' `"" -Force
+#     }
+# }
+$jsonWTfile.profiles.defaults.font | Add-Member -Name "face" -MemberType NoteProperty -Value $fontName -Force
 $jsonWTfile | ConvertTo-Json -Depth 100 | Out-File $wtSettingsFile
