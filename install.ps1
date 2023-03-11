@@ -49,6 +49,7 @@ winget install XP8K0HKJFRXGCK --accept-package-agreements --accept-source-agreem
 
 # Install Terminal-Icons
 Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck
+Start-Process powershell.exe "-ExecutionPolicy Unrestricted -c `"Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck`" "
 
 # PowerShell Core
 # Install-Module -Name PSReadLine -Scope CurrentUser -Force -SkipPublisherCheck
@@ -64,15 +65,14 @@ Function Load-PowerLine{
 Load-PowerLine
 "@
 
-if (!(Test-Path "$env:USERPROFILE\Documents\WindowsPowerShell")) {
-    mkdir $env:USERPROFILE\Documents\WindowsPowerShell
+# Create Profile PowerShell7
+if (!(Test-Path $PROFILE)) {
+    New-Item $PROFILE -Force
 }
-if (!(Test-Path "$env:USERPROFILE\Documents\PowerShell")) {
-    mkdir $env:USERPROFILE\Documents\PowerShell
-}
+$ProfilePoshGit | Out-File $PROFILE -Append
 
-$ProfilePoshGit | Out-File "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
-$ProfilePoshGit | Out-File "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
+# Create Profile PowerShell 5
+Start-Process powershell.exe "-ExecutionPolicy Unrestricted -c `"Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck; if(!(Test-Path `$PROFILE)){New-Item `$PROFILE -Force}; $ProfilePoshGit | Out-File `$PROFILE -Append`" "
 
 # $addmember =@"
 # {
