@@ -74,6 +74,9 @@ $ProfilePoshGit | Out-File $PROFILE -Append
 #Start-Process powershell.exe "-ExecutionPolicy Unrestricted -c `"Set-ExecutionPolicy -ExecutionPolicy Unrestricted; Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck; if(!(Test-Path `$PROFILE)){New-Item `$PROFILE -Force}; $ProfilePoshGit | Out-File `$PROFILE -Append`;Read-Host `"Press Enter to close this window`"" "
 $scriptblock = {
     Set-ExecutionPolicy -ExecutionPolicy Unrestricted;
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+    Set-PSRepository PSGallery -InstallationPolicy Trusted
     Install-Module -Name Terminal-Icons -Repository PSGallery -Force -SkipPublisherCheck;
     if(!(Test-Path $PROFILE)){New-Item $PROFILE -Force};
 $ProfilePoshGit = @"
