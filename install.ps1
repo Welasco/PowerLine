@@ -64,6 +64,13 @@ Function Load-PowerLine{
 Load-PowerLine
 "@
 
+if (!(Test-Path "$env:USERPROFILE\Documents\WindowsPowerShell")) {
+    mkdir $env:USERPROFILE\Documents\WindowsPowerShell
+}
+if (!(Test-Path "$env:USERPROFILE\Documents\PowerShell")) {
+    mkdir $env:USERPROFILE\Documents\PowerShell
+}
+
 $ProfilePoshGit | Out-File "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
 $ProfilePoshGit | Out-File "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 
@@ -107,6 +114,11 @@ $jsonWTfile.profiles.list
 #         $item | Add-Member -Name "commandline" -MemberType NoteProperty -Value "pwsh.exe -noprofile -noexit -command `"invoke-expression '. ''C:/Users/$env:USERNAME/Documents/PowerShell/Profile-PoshGit.ps1''' `"" -Force
 #     }
 # }
+
+$Caskaydia_font = [PSCustomObject]@{
+    face = $fontName
+}
+$jsonWTfile.profiles.defaults | Add-Member -Name "font" -MemberType NoteProperty -Value $Caskaydia_font -Force
 $jsonWTfile.profiles.defaults.font | Add-Member -Name "face" -MemberType NoteProperty -Value $fontName -Force
 $jsonWTfile | ConvertTo-Json -Depth 100 | Out-File $wtSettingsFile
 
