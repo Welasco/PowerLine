@@ -111,3 +111,4 @@ $jsonWTfile.profiles.defaults.font | Add-Member -Name "face" -MemberType NotePro
 $jsonWTfile | ConvertTo-Json -Depth 100 | Out-File $wtSettingsFile
 
 Read-Host "Press Enter to close this window"
+exit
