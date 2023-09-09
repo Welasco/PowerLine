@@ -179,5 +179,19 @@ if (Test-Path $vscodeSettingsFile) {
 }
 ###############################################
 
+###############################################
+# Allow F8 to execute selected lines
+###############################################
+#$keybindings = '
+#// Place your key bindings in this file to override the defaultsauto[]
+#[
+#    {
+#        "key": "f8",
+#        "command": "workbench.action.terminal.runSelectedText"
+#    }
+#]
+#'
+#$keybindings | Out-File "$env:APPDATA\Code\User\keybindings.json" -Encoding utf8
+
 Read-Host "Press Enter to close this window"
 exit
