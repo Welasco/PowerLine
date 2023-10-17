@@ -3,7 +3,7 @@
 #$Cred.Password | ConvertFrom-SecureString | Set-Content "C:\Users\vsantana\Documents\WindowsPowershell\VWSHyper-V-Password.sec"
 Function Connect-VWSHyperV{
     $username = "administrator"
-    $password = Get-Content "C:\Users\vsantana\Documents\WindowsPowershell\VWSHyper-V-Password.sec" | convertto-securestring
+    $password = Get-Content "C:\Users\vsantana\OneDrive - Microsoft\Documents\PowerShell\VWSHyper-V-Password.sec" | convertto-securestring
     $global:VWSCredential = new-object -typename System.Management.Automation.PSCredential -argumentlist $username,$password
 
     #Import-PSSession (New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.outlook.com/powershell -Authentication Basic -Credential $Credential -SessionOption (New-PSSessionOption -SkipRevocationCheck -SkipCACheck -SkipCNCheck)  -AllowRedirection)
@@ -24,7 +24,7 @@ Function WakeUp-VWSHyperV{
 
 Function Sleep-VWSHyperV{
     $username = "administrator"
-    $password = Get-Content "C:\Users\vsantana\Documents\WindowsPowershell\VWSHyper-V-Password.sec" | convertto-securestring
+    $password = Get-Content "C:\Users\vsantana\OneDrive - Microsoft\Documents\PowerShell\VWSHyper-V-Password.sec" | convertto-securestring
     $global:VWSCredential = new-object -typename System.Management.Automation.PSCredential -argumentlist $username,$password
 
     $global:VWSJob = Invoke-Command -ComputerName vwshyper-v.localdomain -Credential $VWSCredential -ScriptBlock {C:\sleep.bat} -AsJob
@@ -69,14 +69,38 @@ Function Enable-AzVMAccess{
     }
 }
 
+###
+# Az CLI auto-complete
+Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
+    param($commandName, $wordToComplete, $cursorPosition)
+    $completion_file = New-TemporaryFile
+    $env:ARGCOMPLETE_USE_TEMPFILES = 1
+    $env:_ARGCOMPLETE_STDOUT_FILENAME = $completion_file
+    $env:COMP_LINE = $wordToComplete
+    $env:COMP_POINT = $cursorPosition
+    $env:_ARGCOMPLETE = 1
+    $env:_ARGCOMPLETE_SUPPRESS_SPACE = 0
+    $env:_ARGCOMPLETE_IFS = "`n"
+    $env:_ARGCOMPLETE_SHELL = 'powershell'
+    az 2>&1 | Out-Null
+    Get-Content $completion_file | Sort-Object | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, "ParameterValue", $_)
+    }
+    Remove-Item $completion_file, Env:\_ARGCOMPLETE_STDOUT_FILENAME, Env:\ARGCOMPLETE_USE_TEMPFILES, Env:\COMP_LINE, Env:\COMP_POINT, Env:\_ARGCOMPLETE, Env:\_ARGCOMPLETE_SUPPRESS_SPACE, Env:\_ARGCOMPLETE_IFS, Env:\_ARGCOMPLETE_SHELL
+}
+###
+
 Function Load-PowerLine{
     oh-my-posh init pwsh --config ~/.custom.omp.json | Invoke-Expression
     Import-Module -Name Terminal-Icons
 }
 Load-PowerLine
 
-#New-Alias -Name k -Value kubectl
+if([string]::IsNullOrEmpty((Get-Alias k -ErrorAction SilentlyContinue))){
+    New-Alias -Name k -Value kubectl
+}
+
 kubectl completion powershell | Out-String | Invoke-Expression
 (kubectl completion powershell | Out-String).Replace("-CommandName 'kubectl'","-CommandName 'k'") | Invoke-Expression
-helm completion powershell | Out-String | Invoke-Expression
+#helm completion powershell | Out-String | Invoke-Expression
 oc completion powershell | Out-String | Invoke-Expression
