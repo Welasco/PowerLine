@@ -90,17 +90,47 @@ Register-ArgumentCompleter -Native -CommandName az -ScriptBlock {
 }
 ###
 
-Function Load-PowerLine{
-    oh-my-posh init pwsh --config ~/.custom.omp.json | Invoke-Expression
-    Import-Module -Name Terminal-Icons
-}
-Load-PowerLine
+# Function Load-PowerLine{
+#     oh-my-posh init pwsh --config ~/.custom.omp.json | Invoke-Expression
+#     Import-Module -Name Terminal-Icons
+# }
+# Load-PowerLine
 
-if([string]::IsNullOrEmpty((Get-Alias k -ErrorAction SilentlyContinue))){
-    New-Alias -Name k -Value kubectl
-}
+# if([string]::IsNullOrEmpty((Get-Alias k -ErrorAction SilentlyContinue))){
+#     New-Alias -Name k -Value kubectl
+# }
 
-kubectl completion powershell | Out-String | Invoke-Expression
-(kubectl completion powershell | Out-String).Replace("-CommandName 'kubectl'","-CommandName 'k'") | Invoke-Expression
-#helm completion powershell | Out-String | Invoke-Expression
+# kubectl completion powershell | Out-String | Invoke-Expression
+# (kubectl completion powershell | Out-String).Replace("-CommandName 'kubectl'","-CommandName 'k'") | Invoke-Expression
+# #helm completion powershell | Out-String | Invoke-Expression
+# oc completion powershell | Out-String | Invoke-Expression
+
+# Load Profile Async
+@(
+    {
+        Function Load-PowerLine{
+            $Host.UI.RawUI.WindowTitle = "Loading oh-my-posh..."
+            oh-my-posh init pwsh --config ~/.custom.omp.json | Invoke-Expression
+            Import-Module -Name Terminal-Icons
+        }
+        Load-PowerLine
+
+        #$Host.UI.Write("`nFinish loading oh-my-posh completion`n")
+    }
+    {
+        $Host.UI.RawUI.WindowTitle = "Loading Kubectl..."
+        if([string]::IsNullOrEmpty((Get-Alias k -ErrorAction SilentlyContinue))){
+            New-Alias -Name k -Value kubectl
+        }
+
+        kubectl completion powershell | Out-String | Invoke-Expression
+        (kubectl completion powershell | Out-String).Replace("-CommandName 'kubectl'","-CommandName 'k'") | Invoke-Expression
+        #helm completion powershell | Out-String | Invoke-Expression
+        oc completion powershell | Out-String | Invoke-Expression
+        #$Host.UI.WriteLine("Finish loading kubectl completion")
+        #$Host.UI.Write("`nFinish loading kubectl completion`n")
+        # {{.UserName}}@{{.HostName}} in {{ .PWD }}
+        $Host.UI.RawUI.WindowTitle = "PowerShell Ready"
+    }
+) | Foreach-Object { Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -MaxTriggerCount 1 -Action $_ } | Out-Null
 oc completion powershell | Out-String | Invoke-Expression
