@@ -4,6 +4,10 @@
     "actions":
     [
         {
+            "command": "toggleBroadcastInput",
+            "keys": "alt+shift+b"
+        },        
+        {
             "command":
             {
                 "action": "copy",
